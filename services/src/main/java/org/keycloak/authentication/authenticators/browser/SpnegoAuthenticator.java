@@ -85,6 +85,17 @@ public class SpnegoAuthenticator extends AbstractUsernameFormAuthenticator imple
         }
 
         String spnegoToken = tokens[1];
+        
+        if(spnegoToken != null && !spnegoToken.startsWith("YII")) {
+        	logger.info("Not SPNEGO over Kerberos");
+        	Response challenge = challengeNegotiation(context, null);
+            context.forceChallenge(challenge);
+            return;
+            //This ends up in a Basic Auth popup from the browser after optionalChallengeRedirect()
+        } else {
+        	logger.info("SPNEGO over Kerberos");
+        }
+        
         UserCredentialModel spnegoCredential = UserCredentialModel.kerberos(spnegoToken);
 
         CredentialValidationOutput output = context.getSession().userCredentialManager().authenticate(context.getSession(), context.getRealm(), spnegoCredential);
